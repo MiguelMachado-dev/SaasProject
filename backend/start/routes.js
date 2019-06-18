@@ -17,3 +17,8 @@
 const Route = use('Route')
 
 Route.post('sessions', 'SessionController.store')
+
+Route.group(() => {
+  // Todas as rotas dentro do group utilizarao o middleware que verifica autenticacao
+  Route.resource('teams', 'TeamController').apiOnly() // apiOnly desativa create e edit
+}).middleware('auth')

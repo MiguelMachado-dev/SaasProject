@@ -1,35 +1,18 @@
 'use strict'
 
-/** @typedef {import('@adonisjs/framework/src/Request')} Request */
-/** @typedef {import('@adonisjs/framework/src/Response')} Response */
-/** @typedef {import('@adonisjs/framework/src/View')} View */
-
 /**
  * Resourceful controller for interacting with teams
  */
 class TeamController {
   /**
-   * Show a list of all teams.
+   * Show a list of all teams of the auth user
    * GET teams
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
    */
-  async index ({ request, response, view }) {
-  }
+  async index ({ auth }) {
+    const teams = await auth.user.teams().fetch()
 
-  /**
-   * Render a form to be used for creating a new team.
-   * GET teams/create
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async create ({ request, response, view }) {
+    // will return logged in user teams
+    return teams
   }
 
   /**
@@ -40,7 +23,17 @@ class TeamController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async store ({ request, response }) {
+  async store ({ request, auth }) {
+    const data = request.only(['name'])
+
+    // aqui fara o relacionamento de usuario com o time, fazendo
+    // com que este usuario pertenca ao time / ja pegando o usuario que esta logado
+    const team = await auth.user.teams().create({
+      ...data,
+      user_id: auth.user.id // user_id eh o usuario que criou o time
+    })
+
+    return team
   }
 
   /**
@@ -52,19 +45,13 @@ class TeamController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async show ({ params, request, response, view }) {
-  }
+  async show ({ params, auth }) {
+    const team = await auth.user
+      .teams()
+      .where('teams.id', params.id)
+      .first()
 
-  /**
-   * Render a form to update an existing team.
-   * GET teams/:id/edit
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async edit ({ params, request, response, view }) {
+    return team
   }
 
   /**
@@ -75,7 +62,18 @@ class TeamController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async update ({ params, request, response }) {
+  async update ({ params, request, auth }) {
+    const data = request.only(['name'])
+    const team = await auth.user
+      .teams()
+      .where('teams.id', params.id)
+      .first()
+
+    team.merge(data) // atualiza os campos, pegando o nome do time antigo e mudando pelo o novo
+
+    await team.save() // salva esse time
+
+    return team
   }
 
   /**
@@ -86,7 +84,14 @@ class TeamController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async destroy ({ params, request, response }) {
+  async destroy ({ params, auth }) {
+    // buscar o time que ele quer deletar
+    const team = await auth.user
+      .teams()
+      .where('teams.id', params.id)
+      .first()
+
+    await team.delete()
   }
 }
 
