@@ -22,3 +22,7 @@ Route.group(() => {
   // Todas as rotas dentro do group utilizarao o middleware que verifica autenticacao
   Route.resource('teams', 'TeamController').apiOnly() // apiOnly desativa create e edit
 }).middleware('auth')
+
+Route.group(() => {
+  Route.post('invites', 'InviteController.store')
+}).middleware(['auth', 'team'])
