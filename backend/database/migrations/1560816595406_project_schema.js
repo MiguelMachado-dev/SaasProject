@@ -14,6 +14,8 @@ class ProjectSchema extends Schema {
         .notNullable()
         .references('id')
         .inTable('teams')
+        .onUpdate('CASCADE')
+        .onDelete('CASCADE')
       table.timestamps()
     })
   }
