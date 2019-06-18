@@ -18,11 +18,24 @@ adonis new yardstick --api-only
 
 or manually clone the repo and then run `npm install`.
 
-
 ### Migrations
 
 Run the following command to run startup migrations.
 
 ```js
 adonis migration:run
+```
+
+### Create docker
+
+Run the following command to create docker database.
+
+```js
+docker run --name databasesaas -p 5432:5432 -d -t kartoza/postgis
+```
+
+then, set up the .env and install pg
+
+```js
+npm i --save pg
 ```
